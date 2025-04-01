@@ -2,6 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Speedball Madness Tournament Bracket</title>
   <style>
     body {
@@ -113,6 +114,21 @@
     #download-btn:hover {
       background-color: #0056b3;
     }
+    
+    /* Responsive Styles */
+    @media (max-width: 600px) {
+      body {
+        padding: 10px;
+      }
+      #bracket-container {
+        flex-direction: column;
+        padding: 10px;
+      }
+      .round {
+        min-width: 100%;
+        margin-bottom: 10px;
+      }
+    }
   </style>
   <!-- Include html2canvas from CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -143,6 +159,31 @@
   </div>
   <div style="text-align: center;">
     <button id="download-btn">Download Bracket</button>
+  </div>
+  <div id="instructions" style="margin-top: 30px; max-width: 800px; margin-left: auto; margin-right: auto;">
+    <h2>How to Work With This Bracket</h2>
+    <p>
+      <strong>Step 1:</strong> Enter your name at the top of the page and click "Set Name." This records your identity and the time you started, which will then display as a header above your bracket.
+    </p>
+    <p>
+      <strong>Step 2:</strong> For each matchup in the bracket, click on the team you want to win. Once you select a winner, that match is marked as complete:
+      <ul>
+        <li>Winning teams are highlighted in light green (or light yellow in the final round).</li>
+        <li>Losing teams are marked in light red.</li>
+      </ul>
+    </p>
+    <p>
+      <strong>Step 3:</strong> The bracket automatically updates as winners progress to the next rounds, with connecting lines visually displaying the tournament flow.
+    </p>
+    <p>
+      <strong>Step 4:</strong> When you have finished making your selections, click the "Download Bracket" button. An image of your completed bracket will be generated, including a timestamp indicating when it was downloaded. Save this image to your device.
+    </p>
+    <p>
+      <strong>Step 5:</strong> Send your screenshot to <strong>gurujaya27</strong> on Instagram.
+    </p>
+    <p>
+      <strong>Step 6:</strong> Please complete your bracket before <strong>11am</strong>.
+    </p>
   </div>
 
   <script>
