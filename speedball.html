@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Speedball Madness Tournament Bracket</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f9f9f9;
+      margin: 0;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    #user-info {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    #user-info input {
+      padding: 5px 10px;
+      font-size: 14px;
+    }
+    #user-info button {
+      padding: 5px 10px;
+      font-size: 14px;
+      cursor: pointer;
+      margin-left: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background-color: #fff;
+    }
+    #download-area {
+      border: 1px solid #ddd;
+      padding: 10px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    #user-header {
+      text-align: center;
+      margin-bottom: 20px;
+      font-weight: bold;
+      font-size: 18px;
+      display: none;
+    }
+    #bracket-container {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 20px;
+      overflow-x: auto;
+      padding: 20px;
+      position: relative; /* For SVG overlay */
+    }
+    .round {
+      background: linear-gradient(135deg, #ffffff, #f0f0f0);
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      flex: 1;
+      min-width: 200px;
+    }
+    .round h2 {
+      text-align: center;
+      margin-top: 0;
+      font-size: 16px;
+      line-height: 1.2;
+    }
+    .match {
+      margin: 20px 0;
+      text-align: center;
+      position: relative;
+    }
+    .match button {
+      margin: 5px 0;
+      padding: 5px 10px;
+      font-size: 14px;
+      cursor: pointer;
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background-color: #fff;
+    }
+    .match button:hover {
+      background-color: #e0e0e0;
+    }
+    .match button:disabled {
+      cursor: default;
+      opacity: 0.7;
+    }
+    #connector-svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: visible;
+    }
+    #download-btn {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 20px;
+      border: none;
+      border-radius: 4px;
+      background-color: #007BFF;
+      color: #fff;
+    }
+    #download-btn:hover {
+      background-color: #0056b3;
+    }
+  </style>
+  <!-- Include html2canvas from CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+  <h1>Speedball Madness Tournament Bracket</h1>
+  <div id="user-info">
+    <input type="text" id="user-name" placeholder="Enter your name" />
+    <button id="set-name-btn">Set Name</button>
+  </div>
+  <div id="download-area">
+    <div id="user-header"></div>
+    <div id="bracket-container">
+      <svg id="connector-svg"></svg>
+      <div class="round" id="round1">
+        <h2>Round 1<br>(April 1st & 2nd)</h2>
+      </div>
+      <div class="round" id="quarterfinals">
+        <h2>Quarterfinals<br>(April 3rd)</h2>
+      </div>
+      <div class="round" id="semifinals">
+        <h2>Semifinals<br>(April 4th)</h2>
+      </div>
+      <div class="round" id="final">
+        <h2>Final</h2>
+      </div>
+    </div>
+  </div>
+  <div style="text-align: center;">
+    <button id="download-btn">Download Bracket</button>
+  </div>
+
+  <script>
+    // Event listener to set the user's name and record the fill time
+    document.getElementById("set-name-btn").addEventListener("click", function() {
+      const name = document.getElementById("user-name").value.trim();
+      if (name !== "") {
+        const now = new Date();
+        const timeText = now.toLocaleString();
+        const headerText = `${name}'s Bracket (Filled out at ${timeText})`;
+        const userHeaderDiv = document.getElementById("user-header");
+        userHeaderDiv.textContent = headerText;
+        userHeaderDiv.style.display = "block";
+        // Hide the name input form
+        document.getElementById("user-info").style.display = "none";
+      }
+    });
+
+    // Bracket data structure
+    const bracketData = {
+      round1: [
+        { teams: ["🐷 Porky Pigs", "🦆 Lucky Ducks"], winner: null },
+        { teams: ["🤷‍♂️ WHAT THE MEHEK", "🔥 Pookie Dookies"], winner: null },
+        { teams: ["🍪 Le Pookies", "🛡 The Invincidihs"], winner: null },
+        { teams: ["🌟 The Big 3 + Saharsh", "🎶 Tune Squad"], winner: null },
+        { teams: ["🎓 Super Seniors", "🚓 Paw Patrol"], winner: null },
+        { teams: ["🚫 The Unemployed", "🍦 The Scoopers"], winner: null },
+        { teams: ["🔷 Dub Squad", "🏀 Leballers"], winner: null },
+        { teams: ["💃 Los Muchachos", "🐝 Stingers"], winner: null }
+      ],
+      quarterfinals: [
+        { teams: [null, null], winner: null },
+        { teams: [null, null], winner: null },
+        { teams: [null, null], winner: null },
+        { teams: [null, null], winner: null }
+      ],
+      semifinals: [
+        { teams: [null, null], winner: null },
+        { teams: [null, null], winner: null }
+      ],
+      final: { teams: [null, null], winner: null }
+    };
+
+    // Propagate winners to the next rounds
+    function updateQuarterfinals() {
+      bracketData.quarterfinals[0].teams[0] = bracketData.round1[0].winner;
+      bracketData.quarterfinals[0].teams[1] = bracketData.round1[1].winner;
+      bracketData.quarterfinals[1].teams[0] = bracketData.round1[2].winner;
+      bracketData.quarterfinals[1].teams[1] = bracketData.round1[3].winner;
+      bracketData.quarterfinals[2].teams[0] = bracketData.round1[4].winner;
+      bracketData.quarterfinals[2].teams[1] = bracketData.round1[5].winner;
+      bracketData.quarterfinals[3].teams[0] = bracketData.round1[6].winner;
+      bracketData.quarterfinals[3].teams[1] = bracketData.round1[7].winner;
+    }
+
+    function updateSemifinals() {
+      bracketData.semifinals[0].teams[0] = bracketData.quarterfinals[0].winner;
+      bracketData.semifinals[0].teams[1] = bracketData.quarterfinals[1].winner;
+      bracketData.semifinals[1].teams[0] = bracketData.quarterfinals[2].winner;
+      bracketData.semifinals[1].teams[1] = bracketData.quarterfinals[3].winner;
+    }
+
+    function updateFinal() {
+      bracketData.final.teams[0] = bracketData.semifinals[0].winner;
+      bracketData.final.teams[1] = bracketData.semifinals[1].winner;
+    }
+
+    // Render matches for a round
+    function renderMatches(roundName) {
+      const container = document.getElementById(roundName);
+      // Remove old matches
+      container.querySelectorAll('.match').forEach(match => match.remove());
+      
+      let matches = [];
+      if (roundName === 'final') {
+        matches.push(bracketData.final);
+      } else {
+        matches = bracketData[roundName];
+      }
+
+      matches.forEach((match, index) => {
+        let matchDiv = document.createElement('div');
+        matchDiv.className = 'match';
+        match.teams.forEach((team, tIndex) => {
+          let btn = document.createElement('button');
+          if (team) {
+            // If a winner has been selected
+            if (match.winner) {
+              if (match.winner === team) {
+                btn.textContent = team + " (Winner)";
+                btn.style.fontWeight = 'bold';
+                // Final round winner highlighted in yellow; earlier rounds in light green.
+                if (roundName === 'final') {
+                  btn.style.backgroundColor = "#ffffcc"; // light yellow
+                } else {
+                  btn.style.backgroundColor = "#ccffcc"; // light green
+                }
+              } else {
+                btn.textContent = team;
+                // Losing team highlighted in light red
+                btn.style.backgroundColor = "#ffcccc"; // light red
+              }
+              btn.disabled = true;
+            } else {
+              btn.textContent = team;
+              btn.addEventListener('click', function() {
+                selectWinner(roundName, index, tIndex);
+              });
+            }
+          } else {
+            btn.textContent = 'TBD';
+            btn.disabled = true;
+          }
+          matchDiv.appendChild(btn);
+        });
+        container.appendChild(matchDiv);
+      });
+      updateConnectors();
+    }
+
+    // When a user selects a winner in a match
+    function selectWinner(round, matchIndex, teamIndex) {
+      // Special handling for the final round
+      if (round === 'final') {
+        let selectedTeam = bracketData.final.teams[teamIndex];
+        if (!selectedTeam) return;
+        bracketData.final.winner = selectedTeam;
+        renderMatches('final');
+        return;
+      }
+      
+      let selectedTeam = bracketData[round][matchIndex].teams[teamIndex];
+      if (!selectedTeam) return;
+      bracketData[round][matchIndex].winner = selectedTeam;
+      
+      if (round === 'round1') {
+        updateQuarterfinals();
+        renderMatches('quarterfinals');
+      } else if (round === 'quarterfinals') {
+        updateSemifinals();
+        renderMatches('semifinals');
+      } else if (round === 'semifinals') {
+        updateFinal();
+        renderMatches('final');
+      }
+      renderMatches(round);
+    }
+
+    // Update connectors between rounds using SVG
+    function updateConnectors() {
+      const svg = document.getElementById("connector-svg");
+      svg.innerHTML = "";
+      const containerRect = document.getElementById("bracket-container").getBoundingClientRect();
+
+      function getCenter(el, fromRight = false) {
+        const rect = el.getBoundingClientRect();
+        return {
+          x: fromRight ? (rect.right - containerRect.left) : (rect.left - containerRect.left),
+          y: rect.top + rect.height / 2 - containerRect.top
+        };
+      }
+
+      // Connect Round 1 to Quarterfinals
+      const round1Matches = document.getElementById("round1").getElementsByClassName("match");
+      const quarterMatches = document.getElementById("quarterfinals").getElementsByClassName("match");
+      for (let i = 0; i < 4; i++) {
+        const sourceIndices = [i * 2, i * 2 + 1];
+        const destMatch = quarterMatches[i];
+        const destCenter = getCenter(destMatch, false);
+        sourceIndices.forEach(si => {
+          const sourceMatch = round1Matches[si];
+          if (sourceMatch) {
+            const sourceCenter = getCenter(sourceMatch, true);
+            drawLine(svg, sourceCenter.x, sourceCenter.y, destCenter.x, destCenter.y);
+          }
+        });
+      }
+
+      // Connect Quarterfinals to Semifinals
+      const quarterMatchesAll = document.getElementById("quarterfinals").getElementsByClassName("match");
+      const semiMatches = document.getElementById("semifinals").getElementsByClassName("match");
+      for (let i = 0; i < 2; i++) {
+        const sourceIndices = [i * 2, i * 2 + 1];
+        const destMatch = semiMatches[i];
+        const destCenter = getCenter(destMatch, false);
+        sourceIndices.forEach(si => {
+          const sourceMatch = quarterMatchesAll[si];
+          if (sourceMatch) {
+            const sourceCenter = getCenter(sourceMatch, true);
+            drawLine(svg, sourceCenter.x, sourceCenter.y, destCenter.x, destCenter.y);
+          }
+        });
+      }
+
+      // Connect Semifinals to Final
+      const semiMatchesAll = document.getElementById("semifinals").getElementsByClassName("match");
+      const finalMatch = document.getElementById("final").getElementsByClassName("match")[0];
+      if (finalMatch) {
+        const destCenter = getCenter(finalMatch, false);
+        for (let i = 0; i < semiMatchesAll.length; i++) {
+          const sourceMatch = semiMatchesAll[i];
+          const sourceCenter = getCenter(sourceMatch, true);
+          drawLine(svg, sourceCenter.x, sourceCenter.y, destCenter.x, destCenter.y);
+        }
+      }
+    }
+
+    function drawLine(svg, x1, y1, x2, y2) {
+      const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      line.setAttribute("x1", x1);
+      line.setAttribute("y1", y1);
+      line.setAttribute("x2", x2);
+      line.setAttribute("y2", y2);
+      line.setAttribute("stroke", "#000");
+      line.setAttribute("stroke-width", "2");
+      svg.appendChild(line);
+    }
+
+    // Download bracket as image with timestamp overlay
+    document.getElementById("download-btn").addEventListener("click", function() {
+      html2canvas(document.getElementById("download-area")).then(function(canvas) {
+         const ctx = canvas.getContext("2d");
+         const now = new Date();
+         const timeText = "Downloaded: " + now.toLocaleString();
+         ctx.font = "16px Arial";
+         ctx.fillStyle = "black";
+         const textWidth = ctx.measureText(timeText).width;
+         const padding = 10;
+         const x = canvas.width - textWidth - padding;
+         const y = canvas.height - padding;
+         ctx.fillText(timeText, x, y);
+         
+         const link = document.createElement("a");
+         link.href = canvas.toDataURL("image/png");
+         link.download = "bracket.png";
+         link.click();
+      });
+    });
+
+    // Initial rendering when the page loads
+    window.onload = function() {
+      renderMatches('round1');
+      renderMatches('quarterfinals');
+      renderMatches('semifinals');
+      renderMatches('final');
+    };
+  </script>
+</body>
+</html>
